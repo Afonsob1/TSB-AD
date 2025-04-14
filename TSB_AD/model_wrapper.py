@@ -4,7 +4,7 @@ from .utils.slidingWindows import find_length_rank
 
 Unsupervise_AD_Pool = ['FFT', 'SR', 'NORMA', 'Series2Graph', 'Sub_IForest', 'IForest', 'LOF', 'Sub_LOF', 'POLY', 'MatrixProfile', 'Sub_PCA', 'PCA', 'HBOS', 
                         'Sub_HBOS', 'KNN', 'Sub_KNN','KMeansAD', 'KMeansAD_U', 'KShapeAD', 'COPOD', 'CBLOF', 'COF', 'EIF', 'RobustPCA', 'Lag_Llama', 'TimesFM', 'Chronos', 'MOMENT_ZS']
-Semisupervise_AD_Pool = ['Left_STAMPi', 'SAND', 'MCD', 'Sub_MCD', 'OCSVM', 'Sub_OCSVM', 'AutoEncoder', 'CNN', 'LSTMAD', 'TranAD', 'USAD', 'OmniAnomaly', 
+Semisupervise_AD_Pool = ['Left_STAMPi', 'SAND', 'MCD', 'Sub_MCD', 'OCSVM', 'Sub_OCSVM', 'AutoEncoder', 'CNN', 'CNNFixed', 'CNNNormalize', 'LSTMAD', 'TranAD', 'USAD', 'OmniAnomaly', 
                         'AnomalyTransformer', 'TimesNet', 'FITS', 'Donut', 'OFA', 'MOMENT_FT', 'M2N2']
 
 def run_Unsupervise_AD(model_name, data, **kwargs):
@@ -281,6 +281,23 @@ def run_CNN(data_train, data_test, window_size=100, num_channel=[32, 32, 40], lr
     clf.fit(data_train)
     score = clf.decision_function(data_test)
     return score.ravel()
+
+def run_CNNFixed(data_train, data_test, window_size=100, num_channel=[32, 32, 40], lr=0.0008, n_jobs=1):
+    from .models.CNNFixed import CNN
+    clf = CNN(window_size=window_size, num_channel=num_channel, feats=data_test.shape[1], lr=lr, batch_size=128)
+    clf.fit(data_train)
+    score = clf.decision_function(data_test)
+    return score.ravel()
+
+def run_CNNNormalize(data_train, data_test, window_size=100, num_channel=[32, 32, 40], lr=0.0008, n_jobs=1):
+    from .models.CNNNormalize import CNN
+
+    clf = CNN(window_size=window_size, num_channel=num_channel, feats=data_test.shape[1], lr=lr, batch_size=128)
+    clf.fit(data_train)
+
+    score = clf.decision_function(data_test)
+    return score.ravel()
+
 
 def run_LSTMAD(data_train, data_test, window_size=100, lr=0.0008):
     from .models.LSTMAD import LSTMAD

@@ -14,7 +14,7 @@ class AdaptiveConcatPool1d(nn.Module):
     def __init__(self):
         super().__init__()
         self.ap = torch.nn.AdaptiveAvgPool1d(1)
-        self.mp = torch.nn.AdaptiveAvgPool1d(1)
+        self.mp = torch.nn.AdaptiveMaxPool1d(1)
     
     def forward(self, x):
         return torch.cat([self.ap(x), self.mp(x)], 1)
@@ -200,8 +200,6 @@ class CNN():
                 if self.early_stopping.early_stop:
                     print("   Early stopping<<<")
                 break
-
-        #self.early_stopping.restore_model(self.model)
 
     def decision_function(self, data):
         test_loader = DataLoader(

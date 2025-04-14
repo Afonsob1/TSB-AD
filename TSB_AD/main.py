@@ -9,7 +9,7 @@ from sklearn.preprocessing import MinMaxScaler
 from .evaluation.metrics import get_metrics
 from .utils.slidingWindows import find_length_rank
 from .model_wrapper import *
-from .HP_list import Optimal_Uni_algo_HP_dict
+from .HP_list import Optimal_Uni_algo_HP_dict, Optimal_Multi_algo_HP_dict
 
 # seeding
 seed = 2024
@@ -42,7 +42,7 @@ if __name__ == '__main__':
     slidingWindow = find_length_rank(data, rank=1)
     train_index = args.filename.split('.')[0].split('_')[-3]
     data_train = data[:int(train_index), :]
-    Optimal_Det_HP = Optimal_Uni_algo_HP_dict[args.AD_Name]
+    Optimal_Det_HP = Optimal_Multi_algo_HP_dict[args.AD_Name]
 
     if args.AD_Name in Semisupervise_AD_Pool:
         output = run_Semisupervise_AD(args.AD_Name, data_train, data, **Optimal_Det_HP)

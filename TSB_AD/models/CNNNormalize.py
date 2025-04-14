@@ -14,7 +14,7 @@ class AdaptiveConcatPool1d(nn.Module):
     def __init__(self):
         super().__init__()
         self.ap = torch.nn.AdaptiveAvgPool1d(1)
-        self.mp = torch.nn.AdaptiveAvgPool1d(1)
+        self.mp = torch.nn.AdaptiveMaxPool1d(1)
     
     def forward(self, x):
         return torch.cat([self.ap(x), self.mp(x)], 1)
@@ -90,13 +90,15 @@ class CNN():
                  lr=0.0008,
                  feats=1,
                  num_channel=[32, 32, 40],
-                 validation_size=0.2):
+                 validation_size=0.2,
+                 normalize=True):
         super().__init__()
         self.__anomaly_score = None
         
         cuda = True
         self.y_hats = None
-        
+        self.normalize = normalize
+
         self.cuda = cuda
         self.device = get_gpu(self.cuda)
         
@@ -123,8 +125,24 @@ class CNN():
         self.eps = 1e-10
         
     def fit(self, data):
+
         tsTrain = data[:int((1-self.validation_size)*len(data))]
+
+        if self.normalize:
+            self.min_val = tsTrain.min(axis=0)
+            self.max_val = tsTrain.max(axis=0)
+        
+            self.max_val = np.where(self.max_val == self.min_val, self.max_val + 1, self.max_val)
+            tsTrain = (tsTrain - self.min_val) / (self.max_val - self.min_val)
+
+            print("min_val: ", self.min_val)
+            print("max_val: ", self.max_val)
+
+
         tsValid = data[int((1-self.validation_size)*len(data)):]
+
+        if self.normalize:
+            tsValid = (tsValid - self.min_val) / (self.max_val - self.min_val)
 
         train_loader = DataLoader(
             ForecastDataset(tsTrain, window_size=self.window_size, pred_len=self.pred_len),
@@ -201,9 +219,10 @@ class CNN():
                     print("   Early stopping<<<")
                 break
 
-        #self.early_stopping.restore_model(self.model)
-
     def decision_function(self, data):
+        if self.normalize:
+            data = (data - self.min_val) / (self.max_val - self.min_val)
+
         test_loader = DataLoader(
             ForecastDataset(data, window_size=self.window_size, pred_len=self.pred_len),
             batch_size=self.batch_size,

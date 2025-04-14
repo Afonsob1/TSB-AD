@@ -104,6 +104,8 @@ Optimal_Multi_algo_HP_dict = {
     'RobustPCA': {'max_iter': 1000},
     'AutoEncoder': {'hidden_neurons': [128, 64]},
     'CNN': {'window_size': 50, 'num_channel': [32, 32, 40]},
+    'CNNFixed': {'window_size': 50, 'num_channel': [32, 32, 40]},
+    'CNNNormalize': {'window_size': 50, 'num_channel': [32, 32, 40]},
     'LSTMAD': {'window_size': 150, 'lr': 0.0008},  
     'TranAD': {'win_size': 10, 'lr': 0.001},  
     'AnomalyTransformer': {'win_size': 50, 'lr': 0.001},  

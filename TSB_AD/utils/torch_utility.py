@@ -18,6 +18,7 @@ class EarlyStoppingTorch:
                             Default: 0
         """
         self.save_path = save_path
+        self.best_model = None
         self.patience = patience
         self.verbose = verbose
         self.counter = 0
@@ -51,6 +52,14 @@ class EarlyStoppingTorch:
             path = os.path.join(self.save_path, 'best_network.pth')
             torch.save(model.state_dict(), path)	
         self.val_loss_min = val_loss
+        self.best_model = model.state_dict()
+
+    def restore_model(self, model):
+        if self.save_path:
+            path = os.path.join(self.save_path, 'best_network.pth')
+            model.load_state_dict(torch.load(path))
+        else:
+            model.load_state_dict(self.best_model)
 
 class PositionalEmbedding(nn.Module):
     def __init__(self, d_model, max_len=5000):
