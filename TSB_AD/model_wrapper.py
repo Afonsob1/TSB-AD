@@ -2,9 +2,9 @@ import numpy as np
 import math
 from .utils.slidingWindows import find_length_rank
 
-Unsupervise_AD_Pool = ['FFT', 'SR', 'NORMA', 'Series2Graph', 'Sub_IForest', 'IForest', 'LOF', 'Sub_LOF', 'POLY', 'MatrixProfile', 'Sub_PCA', 'PCA', 'HBOS', 
+Unsupervise_AD_Pool = ['FFT', 'SR', 'NORMA', 'Series2Graph', 'Sub_IForest', 'IForest', 'LOF', 'Sub_LOF', 'POLY', 'MatrixProfile', 'Sub_PCA', 'PCA', 'HBOS', 'CNN_UNS', 'OmniAnomaly_RW',
                         'Sub_HBOS', 'KNN', 'Sub_KNN','KMeansAD', 'KMeansAD_U', 'KShapeAD', 'COPOD', 'CBLOF', 'COF', 'EIF', 'RobustPCA', 'Lag_Llama', 'TimesFM', 'Chronos', 'MOMENT_ZS']
-Semisupervise_AD_Pool = ['Left_STAMPi', 'SAND', 'MCD', 'Sub_MCD', 'OCSVM', 'Sub_OCSVM', 'AutoEncoder', 'CNN', 'CNNFixed', 'CNNNormalize', 'LSTMAD', 'TranAD', 'USAD', 'OmniAnomaly', 
+Semisupervise_AD_Pool = ['Left_STAMPi', 'SAND', 'MCD', 'Sub_MCD', 'OCSVM', 'Sub_OCSVM', 'AutoEncoder', 'CNN', 'CNNFixed', 'CNNNormalize', 'LSTMAD', 'TranAD', 'USAD', 'OmniAnomaly',  'CNN_RW',
                         'AnomalyTransformer', 'TimesNet', 'FITS', 'Donut', 'OFA', 'MOMENT_FT', 'M2N2']
 
 def run_Unsupervise_AD(model_name, data, **kwargs):
@@ -298,6 +298,17 @@ def run_CNNNormalize(data_train, data_test, window_size=100, num_channel=[32, 32
     score = clf.decision_function(data_test)
     return score.ravel()
 
+def run_CNN_RW(data_train, data, window_size=100, num_channel=[32, 32, 40], lr=0.0008, n_jobs=1):
+    from .models.CNN_RW import CNN_RW
+    clf = CNN_RW(window_size=window_size, num_channel=num_channel, feats=data_train.shape[1], lr=lr, batch_size=256)
+    score = clf.fit(data, train_idx=data_train.shape[0])
+    return score.ravel()
+
+def run_CNN_UNS(data, window_size=100, num_channel=[32, 32, 40], lr=0.0008, n_jobs=1):
+    from .models.CNN_uns import CNN_uns
+    clf = CNN_uns(window_size=window_size, num_channel=num_channel, feats=data.shape[1], lr=lr, batch_size=256)
+    score = clf.fit(data)
+    return score.ravel()
 
 def run_LSTMAD(data_train, data_test, window_size=100, lr=0.0008):
     from .models.LSTMAD import LSTMAD
@@ -325,6 +336,12 @@ def run_OmniAnomaly(data_train, data_test, win_size=100, lr=0.002):
     clf = OmniAnomaly(win_size=win_size, feats=data_test.shape[1], lr=lr)
     clf.fit(data_train)
     score = clf.decision_function(data_test)
+    return score.ravel()
+
+def run_OmniAnomaly_RW(data, win_size=100, lr=0.002):
+    from .models.OmniAnomaly_RW import OmniAnomaly
+    clf = OmniAnomaly(win_size=win_size, feats=data.shape[1], lr=lr, epochs=5)
+    score = clf.fit(data)
     return score.ravel()
 
 def run_USAD(data_train, data_test, win_size=5, lr=1e-4):
